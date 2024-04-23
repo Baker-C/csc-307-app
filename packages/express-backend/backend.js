@@ -1,7 +1,10 @@
 import express from "express";
-
+import cors from "cors"
 const app = express();
 const port = 8000;
+
+app.use(express.json());
+app.use(cors());
 
 const users = {
   users_list: [
@@ -32,8 +35,6 @@ const users = {
     }
   ]
 };
-
-app.use(express.json());
 
 app.listen(port, () => {
   console.log(
@@ -70,7 +71,6 @@ app.get("/users", (req, res) => {
 
   if (name) { // if only name is given
     let result = findUserByName(name);
-    console.log(result)
     result = { users_list: result };
     res.send(result)
   } else if (job) { // if only job is given
