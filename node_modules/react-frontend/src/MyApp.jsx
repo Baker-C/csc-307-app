@@ -14,10 +14,10 @@ function MyApp() {
   }
 
   function postUser(person) {
-    const promise = fetch({BACKEND_URL}, {
+    const promise = fetch(BACKEND_URL, {
       method: "POST",
       headers: {
-        "Content-type": "application/json",
+        "Content-type": "application/json"
       },
       body: JSON.stringify(person),
     })
@@ -26,23 +26,46 @@ function MyApp() {
 
   function updateList(person) {
     postUser(person)
-      .then(() => setCharacters([...characters, person]))
+      .then((res) => {
+        if (res.status === 201) {
+          return res.json()
+        } else {
+          console.log(res.json())
+        }})
+      .then((json) => {
+        console.log(json)
+        if (json) setCharacters([...characters, person])
+      })
       .catch((err) => console.log(err))
   }
 
+  function removeUser(id) {
+    const promise = fetch(`${BACKEND_URL}/${id}`, {
+      method: "DELETE",
+      headers: { 
+        "Content-type": "application/json"
+       },
+    })
+    return promise
+  }
+
   function removeOneCharacter(index) {
+    const id = characters[index]?.id
     const updated = characters.filter((character, i) => {
       return (i !== index);
     });
-    setCharacters(updated);
+    removeUser(id)
+      .then(() => setCharacters(updated))
+      .catch((err) => console.log(err))
   }
 
+  // the initial data fetch for users
   useEffect(() => {
     fetchUsers()
       .then((res) => res.json())
       .then((json) => setCharacters(json["users_list"]))
       .catch((err) => {console.log(err)})
-  }, [])
+  }, [characters])
 
   return (
     <div className="container">

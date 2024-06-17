@@ -6,17 +6,19 @@ function TableHeader() {
         <tr>
           <th>Name</th>
           <th>Job</th>
+          <th>ID</th>
         </tr>
       </thead>
     );
   }
   
   function TableBody({ characterData, removeCharacter }) {
-    const rows = characterData.map(({ name, job }, index) => {
+    const rows = characterData.map(({ name, job, id }, index) => {
       return (
         <tr key={index}>
           <td>{name}</td>
           <td>{job}</td>
+          <td>{id}</td>
           <td>
             <button onClick={() => removeCharacter(index)}>
               Delete Character

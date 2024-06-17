@@ -42,6 +42,30 @@ app.listen(port, () => {
   );
 });
 
+  // checks that id does not match existing, true if duplicate does not exist
+  function duplicateID(id) {
+    const duplicate = users["users_list"].filter((user) => {
+      return (id == user?.id);
+    });
+    return duplicate.length > 0
+  }
+
+  // generates random id of 3 letters and 3 numbers
+  function randomID() {
+    // func for random integers
+    const randomInt = (min, max) => 
+      Math.floor(Math.random() * (max-min) ) + min
+    const id = String.fromCharCode(
+      randomInt(97, 123),
+      randomInt(97, 123),
+      randomInt(97, 123),
+      randomInt(48, 58),
+      randomInt(48, 58),
+      randomInt(48, 58)
+    )
+    return duplicateID(id) ? randomID(id) : id
+  }
+
 const findUserByName = (name) => {
   return users["users_list"].filter(
     (user) => user["name"].toLowerCase() === name
@@ -66,10 +90,12 @@ const findUserByNameAndJob = (name, job) => {
 app.get("/users", (req, res) => {
   const name = req.query.name
   const job = req.query.job
-  let result = undefined
-  if (!name && !job) res.send(users) // if nothing is given
 
-  if (name) { // if only name is given
+  if (name && job) { // if name and job, finds ppl who match both
+    let result = findUserByNameAndJob(name, job)
+    result = { users_list: result };
+    res.send(result)
+  } else if (name) { // if only name is given
     let result = findUserByName(name);
     result = { users_list: result };
     res.send(result)
@@ -78,9 +104,7 @@ app.get("/users", (req, res) => {
     result = { users_list: result };
     res.send(result)
   } else { // if name and job, finds ppl who match both
-    let result = findUserByNameAndJob(name, job)
-    result = { users_list: result };
-    res.send(result)
+    res.send(users)
   }
 });
 
@@ -98,23 +122,32 @@ app.get("/users/:id", (req, res) => {
 });
 
 const addUser = (user) => {
+  user.id = randomID() // add a random user ID
+  console.log(user.id)
   users["users_list"].push(user);
+  console.log(user)
   return user;
 };
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+  const user = addUser(userToAdd);
+  console.log(user)
+  res.status(201).json(user);
 });
 
 // takes in an id and deletes that user from the list
 const deleteUser = (id) => {
+
   users["users_list"] = users["users_list"].filter((user) => user.id !== id)
 }
 
 app.delete("/users/:id", (req, res) => {
   const id = req.params.id
-  deleteUser(id)
-  res.send()
+  const user = deleteUser(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Resource not found' })
+  } else {
+    res.status(204).json({ message: `User ${id} deleted successfully` })
+  }
 })
