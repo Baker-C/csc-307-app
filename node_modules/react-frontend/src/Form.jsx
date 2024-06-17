@@ -7,6 +7,13 @@ function Form({ handleSubmit }) {
         job: ""
     })
 
+    useEffect(() => {
+        fetchUsers()
+            .then((res) => res.json())
+            .then((json) => setCharacters(json["users_list"]))
+            .catch((error) => { console.log(error); });
+    }, [] );
+
     function handleChange(event) {
         const {name, value} = event.target
         if (name === "job")
